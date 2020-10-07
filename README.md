@@ -1,6 +1,9 @@
-# audiograbber
-no more downloading from sketchy websites
+# songbank
+_no more downloading from sketchy websites_
 
+![](https://giphy.com/gifs/film-vintage-color-3ohjUVaRYvIp5i9F7O)
+![](http://gph.is/2B2wILM)
+![](https://media.giphy.com/media/3ohjUVaRYvIp5i9F7O/giphy.gif)
 ----------
 
 ## Usage
@@ -15,3 +18,5 @@ no more downloading from sketchy websites
 
 - Allow users to easily download my directory of urls
 - Download/clone capability
+- Add cookie.txt to get rid of out country and age restricted videos
+- And other things
