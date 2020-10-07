@@ -1,60 +1,37 @@
-from __future__ import print_function
 import os
 import sys
-import subprocess
 import re
 import string
 import pafy
 
-def get_audio(youTubeURL, dl_dir):
+
+def get_audio(url: str, dl_dir: str):
     """ Use pafy to download m4a audio stream """
-    audio = pafy.new(youTubeURL)
+    audio = pafy.new(url)
     audio_stream = audio.getbestaudio(preftype="m4a", ftypestrict=True)
-    filename = re.sub("[^a-zA-Z0-9_ ]", "", audio.title)
-    filename = re.sub("[ ]", "_", filename)
+    filename = clean_title(audio.title)
     print('Downloading ', filename)
     filepath = os.path.join(dl_dir, filename + ".m4a")
     audio_output = audio_stream.download(filepath=filepath)
     return filepath, filename
 
-def convert_audio(m4a_audio, dl_dir):
-    """ Convert m4a audio file to mp3 using ffmpeg """
-    ########### FIX THIS ###########
-    ffmpeg_call = """ffmpeg -i \"%s/%s.m4a\" \"%s/%s.mp3\"""" %(dl_dir, m4aAudio, dl_dir, m4aAudio)
-    subprocess.call(ffmpeg_call, shell=True)
-    os.remove(os.path.join(dl_dir, m4aAudio + ".m4a"))
+def clean_title(title: str) -> str:
+    """
+    Adjust the regex here if you want
 
-def normalize_audio(audio, dl_dir):
-    m4a_path = os.path.join(dl_dir, audio + ".m4a")
-    mp3_path = os.path.join(dl_dir, audio + ".mp3")
-    ffmpeg_normalize_call = """ffmpeg-normalize --threshold 0 --force \"%s\" --format mp3""" %(m4a_path)
-    print("Normalizing audio stream. Wait...\n")
-    subprocess.call(ffmpeg_normalize_call, shell=True)
-    os.remove(m4a_path)
-
-def limit_and_convert_audio(filepath, filename):
-    ffmpeg_call = "ffmpeg -i {0} -filter loudnorm=I=-5.0:linear=false {1}_normalized.mp3".format(filepath, filename)
-    subprocess.call(ffmpeg_call, shell=True)
-
-def normalize_audio_manual(mp3_audio, dl_dir):
-    mp3_path = os.path.join(dl_dir, mp3_audio + ".mp3")
-    ffmpeg_call = """ffmpeg -i %s -af \"volumedetect\" -vn -sn -dn -f null /dev/null""" %(mp3_path)
-    audio_analysis = subprocess.check_output(ffmpeg_call, stderr=subprocess.STDOUT, shell=True)
-    max_volume = audio_analysis.find("max_volume")
-    max_volume_db = audio_analysis[max_volume+13:max_volume+16]
-    ffmpeg_call = """ffmpeg -i \"%s\" -af \"volume=%sdB\" -c:v copy -c:a libmp3lame -q:a 1 \"%s\"""" %(mp3_path, max_volume_db, mp3_path)
-    subprocess.call(ffmpeg_call, shell=True)
+    """
+    filename = re.sub("[^a-zA-Z0-9_ ]", "", title)
+    filename = re.sub("[ ]", "_", filename)
+    return filename
 
 def main(filename, dl_dir):
-    with open(filename, "r") as youTubeURLs:
+    with open(filename, "r") as urls:
         # iterate through each URL in the file
         num_videos = 0
-        for youTubeURL in youTubeURLs.read().split():
-            audio = get_audio(youTubeURL, dl_dir)
-            #normalize_audio(audio) # peak normalize the stream (lectures tend to be quiet)
-            limit_and_convert_audio(audio[0], audio[1])
+        for url in urls.read().split():
+            get_audio(url, dl_dir)
             num_videos += 1
-        print("Downloaded and converted %d video(s)" %(num_videos))
+        print("Downloaded and converted %d video(s)" % num_videos)
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
@@ -65,6 +42,10 @@ if __name__ == "__main__":
         filename = sys.argv[1]
         dl_dir = sys.argv[2]
         main(filename, dl_dir)
-        
     else:
-        print("Usage: python pyYTaudio.py path_to_txt_file path_to_save_dir")
+        print("Downloading Reid's files\n")
+        cur_dir = os.getcwd()
+        dl_dir = os.path.join(cur_dir, "/reids-songs")
+        if not os.path.exists(dl_dir): os.mkdir(dl_dir) 
+        for filename in os.listdir(cur_dir + "/backlog"):
+            main("backlog/" + filename, dl_dir)
