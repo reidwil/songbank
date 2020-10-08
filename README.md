@@ -7,16 +7,23 @@ _no more downloading from sketchy websites_
 ----------
 
 ## Usage
-
-1. find songs on youtube or other mp4 video hosting website
-2. make `touch urls.txt` and `mkdir songs`
-    - don't have to be `urls.txt & yt` but will be referenced later 
-3. copy url (note: probably want to remove other query params)
-4. **run command:** `python app.py urls.txt songs`
+```bash
+$ git clone https://github.com/reidwil/songbank.git
+$ pip install -r requirements.txt
+# For all of my urls within ./backlog/
+$ python3 app.py
+# For all urls you want to feed it
+$ python3 app.py yoururls.txt path/to/download/to
+```
 
 ## Up next
 
-- Allow users to easily download my directory of urls
-- Download/clone capability
-- Add cookie.txt to get rid of out country and age restricted videos
-- And other things
+- [x] Allow users to easily download my directory of urls
+- [x] Download/clone capability
+- [ ] Add cookie.txt to get rid of out country and age restricted videos
+- [ ] And other things
+
+## Bugs
+
+- youtube-dl seems to quit the dl loop - [related](https://github.com/ytdl-org/youtube-dl/issues/22641)
+  - this might just be a timeout because of too many requests... might be worth putting  `sys.sleep(n)` in the download loop
