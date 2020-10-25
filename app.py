@@ -6,13 +6,9 @@ import pafy
 
 
 def clean_title(title: str) -> str:
-    """
-    Adjust the regex here if you want
-
-    """
-    filename = re.sub("[^a-zA-Z0-9_ ]", "", title)
-    filename = re.sub("[ ]", "_", filename)
-    return filename
+    cleaned = re.sub("[^a-zA-Z0-9_ ]", "", title)
+    cleaned = re.sub("[ ]", "_", filename)
+    return cleaned
 
 def get_audio(url: str, dl_dir: str):
     """ Pafy: https://pythonhosted.org/Pafy/ """
