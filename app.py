@@ -5,8 +5,13 @@ import string
 import pafy
 
 
+def clean_title(title: str) -> str:
+    cleaned = re.sub("[^a-zA-Z0-9_ ]", "", title)
+    cleaned = re.sub("[ ]", "_", filename)
+    return cleaned
+
 def get_audio(url: str, dl_dir: str):
-    """ Use pafy to download m4a audio stream """
+    """ Pafy: https://pythonhosted.org/Pafy/ """
     audio = pafy.new(url)
     audio_stream = audio.getbestaudio(preftype="m4a", ftypestrict=True)
     filename = clean_title(audio.title)
@@ -15,23 +20,18 @@ def get_audio(url: str, dl_dir: str):
     audio_output = audio_stream.download(filepath=filepath)
     return filepath, filename
 
-def clean_title(title: str) -> str:
-    """
-    Adjust the regex here if you want
-
-    """
-    filename = re.sub("[^a-zA-Z0-9_ ]", "", title)
-    filename = re.sub("[ ]", "_", filename)
-    return filename
-
 def main(filename, dl_dir):
+    # Operator for the .txt file
     with open(filename, "r") as urls:
-        # iterate through each URL in the file
         num_videos = 0
         for url in urls.read().split():
-            get_audio(url, dl_dir)
-            num_videos += 1
-        print(f"Downloaded and converted {num_videos} video(s)")
+            try:
+                get_audio(url, dl_dir)
+                num_videos += 1
+            except:
+                print("Failed to download: {url}".format(url = url))
+                pass
+        print("Downloaded and converted %d video(s)" % num_videos)
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
@@ -45,17 +45,7 @@ if __name__ == "__main__":
     else:
         print("Downloading Reid's files\n")
         cur_dir = os.getcwd()
-        url_dir = os.path.join(cur_dir, "backlog/")
-        dl_dir = os.path.join(cur_dir, "reids-songs")
-        if not os.path.exists(dl_dir):
-            # Need to make sure the dir is read/write
-            try:
-                os.mkdir(dl_dir, 0o777)
-            except OSError as error:
-                print(error)
-        for file in os.listdir(url_dir):
-            main(url_dir + file, dl_dir)
-
-
-
-
+        dl_dir = os.path.join(cur_dir, "/reids-songs")
+        if not os.path.exists(dl_dir): os.mkdir(dl_dir) 
+        for filename in os.listdir(cur_dir + "/backlog"):
+            main("backlog/" + filename, dl_dir)
