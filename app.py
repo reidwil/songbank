@@ -7,7 +7,7 @@ import pafy
 
 def clean_title(title: str) -> str:
     cleaned = re.sub("[^a-zA-Z0-9_ ]", "", title)
-    cleaned = re.sub("[ ]", "_", filename)
+    cleaned = re.sub("[ ]", "_", cleaned)
     return cleaned
 
 def get_audio(url: str, dl_dir: str):
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     else:
         print("Downloading Reid's files\n")
         cur_dir = os.getcwd()
-        dl_dir = os.path.join(cur_dir, "/reids-songs")
+        dl_dir = os.path.join(cur_dir, "./reids-songs")
         if not os.path.exists(dl_dir): os.mkdir(dl_dir) 
         for filename in os.listdir(cur_dir + "/backlog"):
             main("backlog/" + filename, dl_dir)
