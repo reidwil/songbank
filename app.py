@@ -1,51 +1,55 @@
 import os
 import sys
-import re
-import string
-import pafy
+from src.downloader import main
+from src.parser import args
+from src.finder import files_to_download
 
-
-def clean_title(title: str) -> str:
-    cleaned = re.sub("[^a-zA-Z0-9_ ]", "", title)
-    cleaned = re.sub("[ ]", "_", cleaned)
-    return cleaned
-
-def get_audio(url: str, dl_dir: str):
-    """ Pafy: https://pythonhosted.org/Pafy/ """
-    audio = pafy.new(url)
-    audio_stream = audio.getbestaudio(preftype="m4a", ftypestrict=True)
-    filename = clean_title(audio.title)
-    print('Downloading ', filename)
-    filepath = os.path.join(dl_dir, filename + ".m4a")
-    audio_output = audio_stream.download(filepath=filepath)
-    return filepath, filename
-
-def main(filename, dl_dir):
-    # Operator for the .txt file
-    with open(filename, "r") as urls:
-        num_videos = 0
-        for url in urls.read().split():
-            try:
-                get_audio(url, dl_dir)
-                num_videos += 1
-            except:
-                print("Failed to download: {url}".format(url = url))
-                pass
-        print("Downloaded and converted %d video(s)" % num_videos)
+# Set download dir if not supplied
+if args.output is None:
+    if args.verbose: 
+        print(f"You didn't supply the output dir (-o/--output). the audio files will write here: {os.getcwd()}")
+    args.output = os.getcwd()
 
 if __name__ == "__main__":
-    if len(sys.argv) == 2:
-        filename = sys.argv[1]
-        dl_dir = os.getcwd()
-        main(filename, dl_dir)
-    elif len(sys.argv) == 3:
-        filename = sys.argv[1]
-        dl_dir = sys.argv[2]
-        main(filename, dl_dir)
+    # print(args.input, args.output)
+    if args.input is None:
+        if args.verbose:
+            print(f"No input file was provided, searching for all .txt files starting with {os.getcwd()}")
+        files = files_to_download()
+        if len(files) < 1:
+            print("Found 0 .txt files.\nExiting")
+            sys.exit()
+        print("Found these .txt files:")
+        print(*files, sep = '\n')
+        should_download_all = input("Should download all? (y/n)")
+        if should_download_all == 'y':
+            [main(x, args.output) for x in files]
+        elif should_download_all == 'n':
+            args.input = input("Please specify one of the above files to download: ")
+            if args.input in files:
+                print(f"Found {args.input} - downloading now")
+                main(args.input, args.output)
+            else: 
+                print(f"Provided incorrect .txt file. (Hint: copy and paste one of the above .txt files)")
+                sys.exit()
+        else: 
+            print("Didn't provide `y` or `n`\nExiting")
+            sys.exit()
     else:
-        print("Downloading Reid's files\n")
-        cur_dir = os.getcwd()
-        dl_dir = os.path.join(cur_dir, "./reids-songs")
-        if not os.path.exists(dl_dir): os.mkdir(dl_dir) 
-        for filename in os.listdir(cur_dir + "/backlog"):
-            main("backlog/" + filename, dl_dir)
+        if not os.path.exists(args.output): os.mkdir(args.output) 
+        main(args.input, args.output)
+    # if len() == 2:
+    #     filename = sys.argv[1]
+    #     dl_dir = os.getcwd()
+    #     main(filename, dl_dir)
+    # elif len(sys.argv) == 3:
+    #     filename = sys.argv[1]
+    #     dl_dir = sys.argv[2]
+    #     main(filename, dl_dir)
+    # else:
+    #     print("Downloading Reid's files\n")
+    #     cur_dir = os.getcwd()
+    #     dl_dir = os.path.join(cur_dir, "./reids-songs")
+    #     if not os.path.exists(dl_dir): os.mkdir(dl_dir) 
+    #     for filename in os.listdir(cur_dir + "/backlog"):
+    #         main("backlog/" + filename, dl_dir)
