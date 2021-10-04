@@ -2,4 +2,4 @@ FROM python:3.7.5-alpine3.10
 ARG URL
 COPY . .
 RUN pip install -r /requirements.txt
-CMD [ "bash" ]
+CMD [ "python3", "./run.py", "$URL" ]
